@@ -1,0 +1,15 @@
+Assume I have a given system imbalance which is 500 MW. I have the following assets which I can use to regulate the system imbalance.
+Asset A:
+- control range: +- 300 MW
+- speed of change: 2 MW/ timestep
+Asset B:
+- control range: +- 150
+- speed of change: 15 MW/ timestep
+Asset C:
+- control range: +- 125
+- speed of change: 25 MW/ timestep
+Asset D:
+- control range: +-125
+- speed of change: 250 MW/timestep
+
+I want to react to the given system imbalance. I want to minimize the system imbalance by setting up each asset for each timestep as optimal as possible
