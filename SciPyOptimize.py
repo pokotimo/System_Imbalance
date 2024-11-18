@@ -3,9 +3,11 @@ from scipy.optimize import minimize
 
 # Constants
 SI = -50  # System Imbalance in MW
-AEP = 1.5  # Balancing energy price in €/MW
-BK = [1, 0.5, 0.2, 0.1]
+AEP = 0.5  # Balancing energy price in €/MW
+BK = [0.75, 0.5, 0.2, 0.1]
+BK = np.array(BK).T
 AEK = [2, 1, 0.4, 0.2]
+AEK = np.array(AEK).T
 previous_RL = 100  # Target value for the absolute deviation term
 
 # Bounds for variables P1, P2, P3, P4
@@ -13,21 +15,15 @@ bounds = [(-125, 125), (-125, 125), (-150, 150), (-300, 300)]
 
 # Define the objective function
 def objective(P):
-    P1, P2, P3, P4 = P
-    abs_dev1 = abs(P1 - 100)
-    abs_dev2 = abs(P2 - 100)
-    abs_dev3 = abs(P3 - 100)
-    abs_dev4 = abs(P4 - 100)
+    [P1, P2, P3, P4] = P
+    P = np.array(P)
+    abs_dev = abs(P - 50)
     
-    RL = P1 + P2 + P3 + P4
+    RL = sum(P)
     penalty = AEP * (np.sign(RL - SI)) * RL
-    
+    # @ Zeichen für Matrixmultiplikation, damit Skalarer Wert herauskommt
     obj = (
-        -BK[0] * P1 - (BK[0])**2 * P1**2 - AEK[0] * abs_dev1 +
-        -BK[1] * P2 - (BK[1])**2 * P2**2 - AEK[1] * abs_dev2 +
-        -BK[2] * P3 - (BK[2])**2 * P3**2 - AEK[2] * abs_dev3 +
-        -BK[3] * P4 - (BK[3])**2 * P4**2 - AEK[3] * abs_dev4 +
-        penalty
+        -BK @ P - (BK)**2 @ P**2 - AEK @ abs_dev + penalty
     )
     return obj
 
