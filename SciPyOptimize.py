@@ -8,7 +8,10 @@ BK = [0.75, 0.5, 0.2, 0.1]
 BK = np.array(BK).T
 AEK = [2, 1, 0.4, 0.2]
 AEK = np.array(AEK).T
-previous_RL = 100  # Target value for the absolute deviation term
+previous_RL = [100,100,100,100]  # Target value for the absolute deviation term
+previous_RL = np.array(previous_RL)
+max_delta = [250,25,15,2]
+max_delta = np.array(max_delta)
 
 # Bounds for variables P1, P2, P3, P4
 bounds = [(-125, 125), (-125, 125), (-150, 150), (-300, 300)]
@@ -17,7 +20,7 @@ bounds = [(-125, 125), (-125, 125), (-150, 150), (-300, 300)]
 def objective(P):
     [P1, P2, P3, P4] = P
     P = np.array(P)
-    abs_dev = abs(P - 50)
+    abs_dev = abs(P - previous_RL)
     
     RL = sum(P)
     penalty = AEP * (np.sign(RL - SI)) * RL
@@ -28,24 +31,16 @@ def objective(P):
     return obj
 
 # Define constraints
-def constraint1(P):
-    return 250 - (P[0] - previous_RL)
+def constraint(P):
+    # Calculate the absolute difference between current and previous values
+    abs_delta = np.abs(P - previous_RL)
+    # Ensure the absolute difference is within the allowed range
+    return max_delta - abs_delta
 
-def constraint2(P):
-    return 25 - (P[1] - previous_RL)
-
-def constraint3(P):
-    return 15 - (P[2] - previous_RL)
-
-def constraint4(P):
-    return 2 - (P[3] - previous_RL)
 
 # Add constraints as inequality constraints (g(x) >= 0)
 constraints = [
-    {"type": "ineq", "fun": constraint1},
-    {"type": "ineq", "fun": constraint2},
-    {"type": "ineq", "fun": constraint3},
-    {"type": "ineq", "fun": constraint4},
+    {"type": "ineq", "fun": constraint},
 ]
 
 # Initial guess
